@@ -6,19 +6,23 @@ let events = {};
 let filters = ["exam", "handin", "other"];
 let pendingDateStr = null;
 let currentDetail = { dateStr: null, index: null, event: null };
+const auth = firebase.auth();
 
 // ----------------------
 // Firebase Anonymous Auth
 // ----------------------
-firebase.auth().signInAnonymously()
-  .catch(err => console.error("❌ Firebase auth error:", err));
+firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider())
+  .then(userCredential => {
+    const user = userCredential.user;
+    console.log("Signed in as", user.uid);
+  });
 
 firebase.auth().onAuthStateChanged(user => {
   if (!user) return;
   const uid = user.uid;
   console.log("✅ Signed in anonymously with UID:", uid);
 
-  const eventsRef = db.collection("events").doc(uid);
+  const eventsRef = db.collection("events").doc(user.uid);
 
   // Listen for real-time updates
   eventsRef.onSnapshot(doc => {
