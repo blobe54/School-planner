@@ -1,4 +1,3 @@
-<script>
 let currentDate=new Date();
 let events=JSON.parse(localStorage.getItem("events")||"{}");
 let settings=JSON.parse(localStorage.getItem("settings")||"{}");
@@ -195,4 +194,3 @@ function goToToday(){
   renderCalendar();
 }
 renderCalendar();
-</script>
