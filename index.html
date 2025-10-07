@@ -109,27 +109,25 @@
 <script src="https://www.gstatic.com/firebasejs/9.25.0/firebase-firestore-compat.js"></script>
 
 <script>
-  // Initialize Firebase
-  document.addEventListener("DOMContentLoaded", () => {
-    const firebaseConfig = {
-      apiKey: "AIzaSyBFSZVjHYWso7J9_promQtfjHjOutPG70o",
-      authDomain: "schoolplaner-3ff93.firebaseapp.com",
-      projectId: "schoolplaner-3ff93",
-      storageBucket: "schoolplaner-3ff93.firebasestorage.app",
-      messagingSenderId: "1071108518857",
-      appId: "1:1071108518857:web:4baae7ffd8916fcf0f2e18",
-      measurementId: "G-NY4N6FGWY6"
-    };
-  
-    const app = firebase.initializeApp(firebaseConfig);
-    window.db = firebase.firestore(); // <-- make db global
-    console.log("✅ Firebase initialized successfully");
+  // Initialize Firebase immediately
+  const firebaseConfig = {
+    apiKey: "AIzaSyBFSZVjHYWso7J9_promQtfjHjOutPG70o",
+    authDomain: "schoolplaner-3ff93.firebaseapp.com",
+    projectId: "schoolplaner-3ff93",
+    storageBucket: "schoolplaner-3ff93.firebasestorage.app",
+    messagingSenderId: "1071108518857",
+    appId: "1:1071108518857:web:4baae7ffd8916fcf0f2e18",
+    measurementId: "G-NY4N6FGWY6"
+  };
 
-    const script = document.createElement("script");
-    script.src = "script.js";
-    document.body.appendChild(script);
-  });
+  firebase.initializeApp(firebaseConfig);
+  window.db = firebase.firestore(); // make db global
+  console.log("✅ Firebase initialized successfully");
 </script>
+
+<!-- Load your main script normally -->
+<script src="script.js"></script>
+
 
 </body>
 </html>
