@@ -9,7 +9,7 @@ let pendingDateStr = null;
 let currentDetail = {dateStr:null, index:null, event:null};
 
 window.addEventListener("load", () => {
-  if (typeofdb === "undifined") {
+  if (typeofdb !== "undifined") {
     console.error("❌ Firebase not initialized yet — check your index.html script order.");
     return;
   }
