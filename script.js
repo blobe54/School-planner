@@ -14,6 +14,7 @@ db.collection("events").onSnapshot(snapshot => {
   snapshot.forEach(doc => {
     events[doc.id] = doc.data().eventsArray || [];
   });
+  console.log("Loaded events from Firestone:", events);
   renderCalendar(); // render calendar after Firestore updates
 });
 
