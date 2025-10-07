@@ -1,12 +1,13 @@
 let currentDate=new Date();
 let events = {};   
 async function loadEvents() {
-  const snapshot = await db.collection("events").get();   
-  snapshot.forEach(doc => {     
-    events[doc.id] = doc.data().eventsArray; // or however you structure events  
-  });   
-  renderCalendar(); }  
-loadEvents();
+  db.collection("events").onSnapshot(snapshot => {
+  events = {}; // reset local events
+  snapshot.forEach(doc => {
+    events[doc.id] = doc.data().eventsArray;
+  });
+  renderCalendar();
+});
 let settings=JSON.parse(localStorage.getItem("settings")||"{}");
 let filters=["exam","handin","other"];
 let pendingDateStr=null;
