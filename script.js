@@ -8,15 +8,23 @@ let filters = ["exam","handin","other"];
 let pendingDateStr = null;
 let currentDetail = {dateStr:null, index:null, event:null};
 
+window.addEventListener("load", () => {
+  if (typeofdb === "undifined") {
+    console.error("❌ Firebase not initialized yet — check your index.html script order.");
+    return;
+  }
+
 // Listen for real-time updates
-db.collection("events").onSnapshot(snapshot => {
-  events = {}; // reset local events
-  snapshot.forEach(doc => {
-    events[doc.id] = doc.data().eventsArray || [];
+  db.collection("events").onSnapshot(snapshot => {
+    events = {}; // reset local events
+    snapshot.forEach(doc => {
+      events[doc.id] = doc.data().eventsArray || [];
+    });
+    console.log("Loaded events from Firestone:", events);
+    renderCalendar(); // render calendar after Firestore updates
   });
-  console.log("Loaded events from Firestone:", events);
-  renderCalendar(); // render calendar after Firestore updates
 });
+  
 
 
 // ----------------------
