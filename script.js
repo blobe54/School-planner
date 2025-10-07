@@ -1,11 +1,23 @@
 let currentDate=new Date();
-let events=JSON.parse(localStorage.getItem("events")||"{}");
+let events = {};   
+async function loadEvents() {
+  const snapshot = await db.collection("events").get();   
+  snapshot.forEach(doc => {     
+    events[doc.id] = doc.data().eventsArray; // or however you structure events  
+  });   
+  renderCalendar(); }  
+loadEvents();
 let settings=JSON.parse(localStorage.getItem("settings")||"{}");
 let filters=["exam","handin","other"];
 let pendingDateStr=null;
 let currentDetail={dateStr:null,index:null,event:null};
 
-function saveEvents(){ localStorage.setItem("events",JSON.stringify(events)); }
+async function saveEvents() {
+  for (const [dateStr, evts] of Object.entries(events)) {
+    await db.collection("events").doc(dateStr).set({ eventsArray: evts });
+  }
+}
+
 function saveSettings(){ settings.semesterStart=document.getElementById("semesterStart").value; settings.semesterEnd=document.getElementById("semesterEnd").value; localStorage.setItem("settings",JSON.stringify(settings)); closeSettings(); }
 function openSettings(){ document.getElementById("semesterStart").value=settings.semesterStart||""; document.getElementById("semesterEnd").value=settings.semesterEnd||""; document.getElementById("settingsModal").style.display="flex"; }
 function closeSettings(){ document.getElementById("settingsModal").style.display="none"; }
