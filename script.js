@@ -7,6 +7,7 @@ let settings = JSON.parse(localStorage.getItem("settings")||"{}");
 let filters = ["exam","handin","other"];
 let pendingDateStr = null;
 let currentDetail = {dateStr:null, index:null, event:null};
+const db = window.db;
 
 window.addEventListener("load", () => {
   if (typeof db !== "undifined") {
