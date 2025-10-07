@@ -58,20 +58,18 @@ function selectType(button) {
 function toggleFilter(type) {
   if (filters.includes(type)) filters = filters.filter(t => t !== type);
   else filters.push(type);
-  renderCalendar();
 }
 
 // ----------------------
 // Calendar Navigation
 // ----------------------
-function prevMonth() { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); }
-function nextMonth() { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); }
+function prevMonth() { currentDate.setMonth(currentDate.getMonth() - 1);}
+function nextMonth() { currentDate.setMonth(currentDate.getMonth() + 1);}
 function jumpToMonth() {
   const month = parseInt(document.getElementById("monthSelect").value);
   currentDate.setMonth(month);
-  renderCalendar();
 }
-function goToToday() { currentDate = new Date(); renderCalendar(); }
+function goToToday() { currentDate = new Date(); }
 
 // ----------------------
 // Event Modals
@@ -114,7 +112,7 @@ function saveNewEvent() {
   
   saveEvents();
   closeNewEvent();
-  renderCalendar();
+  
 }
 
 function repeatForSemester() {
@@ -141,7 +139,7 @@ function repeatForSemester() {
 
   saveEvents();
   closeNewEvent();
-  renderCalendar();
+  
 }
 
 function saveEdit(all) {
@@ -157,7 +155,6 @@ function saveEdit(all) {
   }
 
   saveEvents();
-  renderCalendar();
   closeEventDetail();
 }
 
@@ -176,7 +173,6 @@ function deleteEvent(all) {
   }
 
   saveEvents();
-  renderCalendar();
   closeEventDetail();
 }
 
@@ -185,14 +181,12 @@ function toggleComplete() {
   const ev = events[currentDetail.dateStr][currentDetail.index];
   ev.completed = !ev.completed;
   saveEvents();
-  renderCalendar();
   closeEventDetail();
 }
 
 function toggleCompleteFromCalendar(dateStr, index) {
   events[dateStr][index].completed = !events[dateStr][index].completed;
   saveEvents();
-  renderCalendar();
 }
 
 // ----------------------
