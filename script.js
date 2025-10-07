@@ -7,26 +7,22 @@ let settings = JSON.parse(localStorage.getItem("settings")||"{}");
 let filters = ["exam","handin","other"];
 let pendingDateStr = null;
 let currentDetail = {dateStr:null, index:null, event:null};
-const db = window.db;
 
-window.addEventListener("load", () => {
-  if (typeof db !== "undifined") {
-    console.error("❌ Firebase not initialized yet — check your index.html script order.");
-    return;
-  }
-
-// Listen for real-time updates
+// ----------------------
+// Firestore Listeners
+// ----------------------
+if (typeof db !== "undefined") {
   db.collection("events").onSnapshot(snapshot => {
     events = {}; // reset local events
     snapshot.forEach(doc => {
       events[doc.id] = doc.data().eventsArray || [];
     });
-    console.log("Loaded events from Firestone:", events);
-    renderCalendar(); // render calendar after Firestore updates
+    console.log("📄 Loaded events from Firestore:", events);
+    renderCalendar();
   });
-});
-  
-
+} else {
+  console.error("❌ Firestore not initialized. Check your index.html script order.");
+}
 
 // ----------------------
 // Save events to Firestore
@@ -35,6 +31,7 @@ async function saveEvents() {
   for (const [dateStr, evts] of Object.entries(events)) {
     await db.collection("events").doc(dateStr).set({ eventsArray: evts });
   }
+  console.log("💾 Events saved to Firestore");
 }
 
 // ----------------------
@@ -58,7 +55,7 @@ function closeSettings() {
 }
 
 // ----------------------
-// Event Type & Filters
+// Event Type & Filter
 // ----------------------
 function selectType(button) {
   document.querySelectorAll(".typeBtn").forEach(b => b.classList.remove("active"));
@@ -68,21 +65,23 @@ function selectType(button) {
 function toggleFilter(type) {
   if (filters.includes(type)) filters = filters.filter(t => t !== type);
   else filters.push(type);
+  renderCalendar();
 }
 
 // ----------------------
 // Calendar Navigation
 // ----------------------
-function prevMonth() { currentDate.setMonth(currentDate.getMonth() - 1);}
-function nextMonth() { currentDate.setMonth(currentDate.getMonth() + 1);}
+function prevMonth() { currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(); }
+function nextMonth() { currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(); }
 function jumpToMonth() {
   const month = parseInt(document.getElementById("monthSelect").value);
   currentDate.setMonth(month);
+  renderCalendar();
 }
-function goToToday() { currentDate = new Date(); }
+function goToToday() { currentDate = new Date(); renderCalendar(); }
 
 // ----------------------
-// Event Modals
+// Event CRUD
 // ----------------------
 function openNewEvent(dateStr) {
   pendingDateStr = dateStr;
@@ -94,6 +93,69 @@ function openNewEvent(dateStr) {
 
 function closeNewEvent() { document.getElementById("newEventModal").style.display = "none"; }
 
+function saveNewEvent() {
+  if (!pendingDateStr) return;
+  const title = document.getElementById("newEventTitle").value.trim();
+  if (!title) return alert("Enter a title");
+  const type = document.querySelector(".typeBtn.active")?.getAttribute('data-type') || 'other';
+  const desc = document.getElementById("newEventDesc").value;
+  const freq = document.getElementById("newEventFrequency").value;
+
+  if (!events[pendingDateStr]) events[pendingDateStr] = [];
+  events[pendingDateStr].push({ title, type, desc, completed: false, recurrence: freq, origin: pendingDateStr });
+
+  saveEvents();
+  closeNewEvent();
+  renderCalendar();
+}
+
+// Repeat for semester
+function repeatForSemester() {
+  if (!pendingDateStr) return;
+  const title = document.getElementById("newEventTitle").value.trim();
+  if (!title) return alert("Enter a title");
+  const type = document.querySelector(".typeBtn.active")?.getAttribute('data-type') || 'other';
+  const desc = document.getElementById("newEventDesc").value;
+  const freq = document.getElementById("newEventFrequency").value;
+
+  if (!settings.semesterEnd) return alert("Set semester end date in settings!");
+  let currentDateIter = new Date(pendingDateStr);
+  currentDateIter.setHours(0,0,0,0);
+  const semesterEnd = new Date(settings.semesterEnd);
+  semesterEnd.setHours(0,0,0,0);
+
+  while (currentDateIter <= semesterEnd) {
+    const dateStr = `${currentDateIter.getFullYear()}-${String(currentDateIter.getMonth()+1).padStart(2,"0")}-${String(currentDateIter.getDate()).padStart(2,"0")}`;
+    if (!events[dateStr]) events[dateStr] = [];
+    events[dateStr].push({ title, type, desc, completed: false, recurrence: freq, origin: pendingDateStr });
+
+    if (freq === "weekly") currentDateIter.setDate(currentDateIter.getDate()+7);
+    else break;
+  }
+
+  saveEvents();
+  closeNewEvent();
+  renderCalendar();
+}
+
+// ----------------------
+// Get events in a date range
+// ----------------------
+function getEventInstancesForRange(start, end) {
+  let arr = [];
+  for (const [dateStr, evts] of Object.entries(events)) {
+    const [y,m,d] = dateStr.split("-").map(Number);
+    const dt = new Date(y,m-1,d);
+    if (dt >= start && dt <= end) {
+      evts.forEach((e,i) => arr.push({ ...e, date: dt, dateStr, index: i }));
+    }
+  }
+  return arr;
+}
+
+// ----------------------
+// Event Detail
+// ----------------------
 function openEventDetail(evt) {
   currentDetail = { dateStr: evt.dateStr, index: evt.index, event: evt };
   document.getElementById("detailTitle").textContent = evt.title;
@@ -103,53 +165,7 @@ function openEventDetail(evt) {
 
 function closeEventDetail() {
   document.getElementById("eventDetailModal").style.display = "none";
-  currentDetail = { dateStr: null, index: null, event: null };
-}
-
-// ----------------------
-// Event Management
-// ----------------------
-function saveNewEvent() {
-  if (!pendingDateStr) return;
-  const title = document.getElementById("newEventTitle").value.trim();
-  if (!title) return alert("Enter a title");
-  const type = document.querySelector(".typeBtn.active")?.getAttribute("data-type") || "other";
-  const desc = document.getElementById("newEventDesc").value;
-  const freq = document.getElementById("newEventFrequency").value;
-
-  if (!events[pendingDateStr]) events[pendingDateStr] = [];
-  events[pendingDateStr].push({ title, type, desc, completed: false, recurrence: freq, origin: pendingDateStr });
-  
-  saveEvents();
-  closeNewEvent();
-  
-}
-
-function repeatForSemester() {
-  if (!pendingDateStr) return;
-  const title = document.getElementById("newEventTitle").value.trim();
-  if (!title) return alert("Enter a title");
-  const type = document.querySelector(".typeBtn.active")?.getAttribute("data-type") || "other";
-  const desc = document.getElementById("newEventDesc").value;
-  const freq = document.getElementById("newEventFrequency").value;
-
-  if (!settings.semesterEnd) return alert("Set semester end date in settings!");
-  let currentIter = new Date(pendingDateStr);
-  currentIter.setHours(0, 0, 0, 0);
-  const semesterEnd = new Date(settings.semesterEnd);
-  semesterEnd.setHours(0, 0, 0, 0);
-
-  while (currentIter <= semesterEnd) {
-    const dateStr = `${currentIter.getFullYear()}-${String(currentIter.getMonth() + 1).padStart(2, "0")}-${String(currentIter.getDate()).padStart(2, "0")}`;
-    if (!events[dateStr]) events[dateStr] = [];
-    events[dateStr].push({ title, type, desc, completed: false, recurrence: freq, origin: pendingDateStr });
-    if (freq === "weekly") currentIter.setDate(currentIter.getDate() + 7);
-    else break;
-  }
-
-  saveEvents();
-  closeNewEvent();
-  
+  currentDetail = { dateStr:null, index:null, event:null };
 }
 
 function saveEdit(all) {
@@ -165,6 +181,7 @@ function saveEdit(all) {
   }
 
   saveEvents();
+  renderCalendar();
   closeEventDetail();
 }
 
@@ -178,11 +195,12 @@ function deleteEvent(all) {
       if (events[dateStr].length === 0) delete events[dateStr];
     }
   } else {
-    events[currentDetail.dateStr].splice(currentDetail.index, 1);
+    events[currentDetail.dateStr].splice(currentDetail.index,1);
     if (events[currentDetail.dateStr].length === 0) delete events[currentDetail.dateStr];
   }
 
   saveEvents();
+  renderCalendar();
   closeEventDetail();
 }
 
@@ -191,82 +209,30 @@ function toggleComplete() {
   const ev = events[currentDetail.dateStr][currentDetail.index];
   ev.completed = !ev.completed;
   saveEvents();
+  renderCalendar();
   closeEventDetail();
 }
 
-function toggleCompleteFromCalendar(dateStr, index) {
+function toggleCompleteFromCalendar(dateStr,index){
   events[dateStr][index].completed = !events[dateStr][index].completed;
   saveEvents();
+  renderCalendar();
 }
 
 // ----------------------
-// Helpers
-// ----------------------
-function getEventInstancesForRange(start, end) {
-  let arr = [];
-  for (const [dateStr, evts] of Object.entries(events)) {
-    const [y, m, d] = dateStr.split("-").map(Number);
-    const dt = new Date(y, m - 1, d);
-    if (dt >= start && dt <= end) {
-      evts.forEach((e, i) => arr.push({ ...e, date: dt, dateStr, index: i }));
-    }
-  }
-  return arr;
-}
-
-function renderUpcoming() {
-  const upcomingList = document.getElementById("upcomingList");
-  upcomingList.innerHTML = "";
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const sevenDaysLater = new Date(today); sevenDaysLater.setDate(today.getDate() + 7);
-
-  const upcoming = getEventInstancesForRange(today, sevenDaysLater);
-  upcoming.sort((a, b) => a.date - b.date || a.title.localeCompare(b.title));
-
-  let currentGroup = null;
-  upcoming.forEach(evt => {
-    const dateStr = evt.date.toISOString().split("T")[0];
-    if (currentGroup !== dateStr) {
-      currentGroup = dateStr;
-      const dateBox = document.createElement("div"); dateBox.className = "upcoming-date-box";
-      const dateHeader = document.createElement("div"); 
-      dateHeader.style.fontWeight = "bold"; 
-      dateHeader.style.marginBottom = "6px";
-      dateHeader.textContent = evt.date.toLocaleDateString(undefined, { weekday: 'short', day: '2-digit' });
-      dateBox.appendChild(dateHeader); upcomingList.appendChild(dateBox);
-    }
-    const div = document.createElement("div"); 
-    div.className = "upcoming-event " + evt.type + (evt.completed ? " completed" : "");
-    div.innerHTML = `<span>${evt.title}</span><button onclick="event.stopPropagation(); toggleCompleteFromCalendar('${evt.dateStr}',${evt.index})">✔️</button>`;
-    div.onclick = () => openEventDetail(evt);
-    upcomingList.lastChild.appendChild(div);
-  });
-}
-
-function applySeasonalTheme(month) {
-  document.body.classList.remove("winter", "spring", "summer", "autumn");
-  if ([11,0,1].includes(month)) document.body.classList.add("winter");
-  else if ([2,3,4].includes(month)) document.body.classList.add("spring");
-  else if ([5,6,7].includes(month)) document.body.classList.add("summer");
-  else if ([8,9,10].includes(month)) document.body.classList.add("autumn");
-}
-
-// ----------------------
-// Calendar Render
+// Calendar rendering
 // ----------------------
 function renderCalendar() {
-  const year = currentDate.getFullYear(), month = currentDate.getMonth();
-  let firstDay = new Date(year, month, 1).getDay();
-  firstDay = (firstDay + 6) % 7; // Monday start
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-  applySeasonalTheme(month);
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const firstDay = new Date(year,month,1).getDay(); 
+  const daysInMonth = new Date(year,month+1,0).getDate();
+  
   document.getElementById("monthYear").textContent = currentDate.toLocaleDateString("default",{month:"long"}) + " " + year;
 
   const calendar = document.getElementById("calendar");
   calendar.innerHTML = "";
 
-  // Weekday labels
   const weekdays = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
   weekdays.forEach(dayName => {
     const headerCell = document.createElement("div");
@@ -276,12 +242,14 @@ function renderCalendar() {
   });
 
   const todayDate = new Date(); todayDate.setHours(0,0,0,0);
-  for (let i = 0; i < firstDay; i++) calendar.appendChild(document.createElement("div"));
+  for (let i = 0; i < (firstDay+6)%7; i++) calendar.appendChild(document.createElement("div"));
 
-  for (let day = 1; day <= daysInMonth; day++) {
+  for (let day=1; day<=daysInMonth; day++) {
     const dateStr = `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
-    let cell = document.createElement("div"); cell.className = "day";
+    let cell = document.createElement("div");
+    cell.className = "day";
     if (new Date(year,month,day).toDateString() === todayDate.toDateString()) cell.classList.add("highlight");
+
     cell.innerHTML = `<strong>${day}</strong><div class="events-container"></div>`;
     const container = cell.querySelector(".events-container");
 
@@ -290,9 +258,9 @@ function renderCalendar() {
     getEventInstancesForRange(dayStart, dayEnd).forEach(evt => {
       if (!filters.includes(evt.type)) return;
       const eDiv = document.createElement("div");
-      eDiv.className = "event " + evt.type + (evt.completed ? " completed" : "");
+      eDiv.className = "event "+evt.type+(evt.completed?" completed":"");
       eDiv.innerHTML = `<span>${evt.title}</span><button onclick="event.stopPropagation(); toggleCompleteFromCalendar('${evt.dateStr}',${evt.index})">✔️</button>`;
-      eDiv.onclick = (ev) => { ev.stopPropagation(); openEventDetail(evt); };
+      eDiv.onclick = ev => { ev.stopPropagation(); openEventDetail(evt); };
       container.appendChild(eDiv);
     });
 
@@ -301,12 +269,54 @@ function renderCalendar() {
   }
 
   renderUpcoming();
-
-  const monthSelect = document.getElementById('monthSelect');
-  if (monthSelect) monthSelect.value = month;
 }
 
 // ----------------------
-// Initial Render
+// Upcoming events
 // ----------------------
+function renderUpcoming() {
+  const upcomingList = document.getElementById("upcomingList");
+  upcomingList.innerHTML = "";
+  const today = new Date(); today.setHours(0,0,0,0);
+  const sevenDaysLater = new Date(today); sevenDaysLater.setDate(today.getDate()+7);
+  const upcoming = getEventInstancesForRange(today, sevenDaysLater).sort((a,b) => a.date - b.date || a.title.localeCompare(b.title));
+
+  let currentGroup = null;
+  upcoming.forEach(evt => {
+    const dateStr = evt.date.toISOString().split("T")[0];
+    if (currentGroup !== dateStr) {
+      currentGroup = dateStr;
+      const dateBox = document.createElement("div");
+      dateBox.className = "upcoming-date-box";
+      const dateHeader = document.createElement("div");
+      dateHeader.style.fontWeight = "bold";
+      dateHeader.style.marginBottom = "6px";
+      dateHeader.textContent = evt.date.toLocaleDateString(undefined,{weekday:'short',day:'2-digit'});
+      dateBox.appendChild(dateHeader);
+      upcomingList.appendChild(dateBox);
+    }
+
+    const div = document.createElement("div");
+    div.className = "upcoming-event "+evt.type+(evt.completed?" completed":"");
+    div.innerHTML = `<span>${evt.title}</span><button onclick="event.stopPropagation(); toggleCompleteFromCalendar('${evt.dateStr}',${evt.index})">✔️</button>`;
+    div.onclick = () => openEventDetail(evt);
+    upcomingList.lastChild.appendChild(div);
+  });
+}
+
+// ----------------------
+// Apply seasonal theme
+// ----------------------
+function applySeasonalTheme(month) {
+  document.body.classList.remove("winter","spring","summer","autumn");
+  if ([11,0,1].includes(month)) document.body.classList.add("winter");
+  else if ([2,3,4].includes(month)) document.body.classList.add("spring");
+  else if ([5,6,7].includes(month)) document.body.classList.add("summer");
+  else if ([8,9,10].includes(month)) document.body.classList.add("autumn");
+}
+
+// ----------------------
+// Initial render
+// ----------------------
+renderCalendar();
 
