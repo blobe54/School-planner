@@ -7,6 +7,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
+
+<!-- Sidebar -->
 <div id="sidebar">
   <h3>Upcoming</h3>
   <div id="filters">
@@ -17,6 +19,7 @@
   <div id="upcomingList"></div>
 </div>
 
+<!-- Calendar -->
 <div id="calendar-container">
   <div id="calendar-header">
     <button onclick="prevMonth()">◀</button>
@@ -46,7 +49,7 @@
   <div id="calendar"></div>
 </div>
 
-<!-- Event Creation Modal -->
+<!-- New Event Modal -->
 <div class="modal" id="newEventModal">
   <div class="modal-content">
     <h3>New Event</h3>
@@ -100,24 +103,27 @@
     <button onclick="closeSettings()">Close</button>
   </div>
 </div>
-  <!-- Firebase App (the core Firebase SDK) -->
+
+<!-- Firebase SDK (compat version) -->
 <script src="https://www.gstatic.com/firebasejs/9.25.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.25.0/firebase-firestore-compat.js"></script>
 
 <script>
   // Initialize Firebase
- const firebaseConfig = {
-  apiKey: "AIzaSyBFSZVjHYWso7J9_promQtfjHjOutPG70o",
-  authDomain: "schoolplaner-3ff93.firebaseapp.com",
-  projectId: "schoolplaner-3ff93",
-  storageBucket: "schoolplaner-3ff93.firebasestorage.app",
-  messagingSenderId: "1071108518857",
-  appId: "1:1071108518857:web:4baae7ffd8916fcf0f2e18",
-  measurementId: "G-NY4N6FGWY6"
-};
-  const app = firebase.initializeApp(firebaseConfig);
+  const firebaseConfig = {
+    apiKey: "AIzaSyBFSZVjHYWso7J9_promQtfjHjOutPG70o",
+    authDomain: "schoolplaner-3ff93.firebaseapp.com",
+    projectId: "schoolplaner-3ff93",
+    storageBucket: "schoolplaner-3ff93.firebasestorage.app",
+    messagingSenderId: "1071108518857",
+    appId: "1:1071108518857:web:4baae7ffd8916fcf0f2e18",
+    measurementId: "G-NY4N6FGWY6"
+  };
+  firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 </script>
+
+<!-- Your main script -->
 <script src="script.js"></script>
 </body>
 </html>
