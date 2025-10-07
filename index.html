@@ -23,7 +23,7 @@
 <div id="calendar-container">
   <div id="calendar-header">
     <button onclick="prevMonth()">◀</button>
-    <div style="display:flex; align-items:center; gap:10px;">
+    <div class="calendar-controls">
       <h2 id="monthYear"></h2>
       <select id="monthSelect" onchange="jumpToMonth()">
         <option value="0">January</option>
@@ -39,7 +39,7 @@
         <option value="10">November</option>
         <option value="11">December</option>
       </select>
-      <div>
+      <div class="nav-buttons">
         <button onclick="openSettings()">⚙️</button>
         <button onclick="goToToday()">Today</button>
         <button onclick="nextMonth()">▶</button>
@@ -48,12 +48,13 @@
   </div>
   <div id="calendar"></div>
 </div>
+
 <!-- New Event Modal -->
 <div class="modal" id="newEventModal">
   <div class="modal-content">
     <h3>New Event</h3>
     <input type="text" id="newEventTitle" placeholder="Title">
-    <div>
+    <div class="event-types">
       <button class="typeBtn examBtn" data-type="exam" onclick="selectType(this)">Exam</button>
       <button class="typeBtn handinBtn" data-type="handin" onclick="selectType(this)">Hand-in</button>
       <button class="typeBtn otherBtn" data-type="other" onclick="selectType(this)">Other</button>
@@ -64,9 +65,11 @@
       <option value="none">None</option>
       <option value="weekly">Weekly</option>
     </select>
-    <button onclick="saveNewEvent()">Save</button>
-    <button onclick="repeatForSemester()">Repeat for Semester</button>
-    <button onclick="closeNewEvent()">Cancel</button>
+    <div class="modal-buttons">
+      <button onclick="saveNewEvent()">Save</button>
+      <button onclick="repeatForSemester()">Repeat for Semester</button>
+      <button onclick="closeNewEvent()">Cancel</button>
+    </div>
   </div>
 </div>
 
@@ -75,18 +78,14 @@
   <div class="modal-content">
     <h3 id="detailTitle"></h3>
     <textarea id="detailDesc"></textarea>
-    <div>
+    <div class="modal-buttons">
       <button onclick="saveEdit(false)">Save (This Event)</button>
       <button onclick="saveEdit(true)">Save (All Weekly)</button>
-    </div>
-    <div>
       <button onclick="deleteEvent(false)">Delete (This Event)</button>
       <button onclick="deleteEvent(true)">Delete (All Weekly)</button>
-    </div>
-    <div>
       <button onclick="toggleComplete()">✔️ Toggle Complete</button>
+      <button onclick="closeEventDetail()">Close</button>
     </div>
-    <button onclick="closeEventDetail()">Close</button>
   </div>
 </div>
 
@@ -98,18 +97,19 @@
     <input type="date" id="semesterStart">
     <label>Semester End</label>
     <input type="date" id="semesterEnd">
-    <button onclick="saveSettings()">Save</button>
-    <button onclick="closeSettings()">Close</button>
+    <div class="modal-buttons">
+      <button onclick="saveSettings()">Save</button>
+      <button onclick="closeSettings()">Close</button>
+    </div>
   </div>
 </div>
 
-<!-- Firebase SDK (compat version) -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-<!-- Main script -->
+<!-- Main Script -->
 <script src="script.js"></script>
-
 </body>
 </html>
