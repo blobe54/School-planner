@@ -2,18 +2,39 @@
 // Initialization
 // ----------------------
 let currentDate = new Date();
-let events = {};   
-let filters = ["exam", "handin", "other"];
+let events = {};
+let settings = JSON.parse(localStorage.getItem("settings")||"{}");
+let filters = ["exam","handin","other"];
 let pendingDateStr = null;
-let currentDetail = { dateStr: null, index: null, event: null };
+let currentDetail = {dateStr:null, index:null, event:null};
 
-// ----------------------
-// Firestore Listener
-// ----------------------
-db.collection("events").onSnapshot(snapshot => {
-  events = {}; // reset local events
-  snapshot.forEach(doc => {
-    events[doc.id] = doc.data().eventsArray || [];
+// Wait for auth to be ready
+firebase.auth().onAuthStateChanged(user => {
+  if (user) {
+    const uid = user.uid;
+    const eventsRef = db.collection("events").doc(uid);
+
+    // Listen for real-time updates
+    eventsRef.onSnapshot(doc => {
+      if (doc.exists) {
+        events = doc.data().eventsArray || {};
+      } else {
+        events = {};
+      }
+      console.log("Loaded events for user:", uid, events);
+      renderCalendar();
+    });
+
+    // Save events function
+    window.saveEvents = async function() {
+      await eventsRef.set({ eventsArray: events });
+      console.log("Saved events for user:", uid);
+    };
+  } else {
+    console.log("User not signed in yet.");
+  }
+});
+
   });
   console.log("✅ Loaded events from Firestore:", events);
   renderCalendar();
