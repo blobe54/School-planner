@@ -124,10 +124,12 @@
     const app = firebase.initializeApp(firebaseConfig);
     window.db = firebase.firestore(); // <-- make db global
     console.log("✅ Firebase initialized successfully");
+
+    const script = document.createElement("script");
+    script.src = "script.js";
+    document.body.appendChild(script);
   });
 </script>
 
-<!-- Your main script -->
-<script src="script.js" defer></script>
 </body>
 </html>
