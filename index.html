@@ -48,7 +48,6 @@
   </div>
   <div id="calendar"></div>
 </div>
-
 <!-- New Event Modal -->
 <div class="modal" id="newEventModal">
   <div class="modal-content">
@@ -109,7 +108,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
 <script>
-  // Initialize Firebase immediately
+  // Initialize Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyBFSZVjHYWso7J9_promQtfjHjOutPG70o",
     authDomain: "schoolplaner-3ff93.firebaseapp.com",
@@ -121,13 +120,12 @@
   };
 
   firebase.initializeApp(firebaseConfig);
-  window.db = firebase.firestore(); // make db global
+  window.db = firebase.firestore(); // make Firestore globally accessible
   console.log("✅ Firebase initialized successfully");
 </script>
 
-<!-- Load your main script normally -->
+<!-- Main script -->
 <script src="script.js"></script>
-
 
 </body>
 </html>
