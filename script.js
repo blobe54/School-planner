@@ -11,11 +11,14 @@ const auth = firebase.auth();
 // ----------------------
 // Firebase Anonymous Auth
 // ----------------------
-firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider())
-  .then(userCredential => {
-    const user = userCredential.user;
+firebase.auth().signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+firebase.auth().getRedirect Result().then(result => {  
+  if (result.user) {
+    const user = result.user;
     console.log("Signed in as", user.uid);
-  });
+    startApp(user.uid);
+  }
+});
 
 firebase.auth().onAuthStateChanged(user => {
   if (!user) return;
