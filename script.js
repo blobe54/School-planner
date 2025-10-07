@@ -1,3 +1,5 @@
+
+
 // ----------------------
 // Initialization
 // ----------------------
@@ -6,43 +8,66 @@ let events = {};
 let filters = ["exam", "handin", "other"];
 let pendingDateStr = null;
 let currentDetail = { dateStr: null, index: null, event: null };
+let settings = JSON.parse(localStorage.getItem("settings") || "{}");
+
+firebase.initializeApp({
+  apiKey: "AIzaSyBFSZVjHYWso7J9_promQtfjHjOutPG70o",
+    authDomain: "schoolplaner-3ff93.firebaseapp.com",
+    projectId: "schoolplaner-3ff93",
+    storageBucket: "schoolplaner-3ff93.firebasestorage.app",
+    messagingSenderId: "1071108518857",
+    appId: "1:1071108518857:web:4baae7ffd8916fcf0f2e18",
+    measurementId: "G-NY4N6FGWY6"
+});
+
 const auth = firebase.auth();
+const db = firebase.firestore();
 
 // ----------------------
-// Firebase Anonymous Auth
+// Google Sign-In
 // ----------------------
-firebase.auth().signInWithRedirect(new firebase.auth.GoogleAuthProvider());
-firebase.auth().getRedirect Result().then(result => {  
-  if (result.user) {
-    const user = result.user;
-    console.log("Signed in as", user.uid);
+function signIn() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithRedirect(provider);
+}
+
+auth.getRedirectResult().then(result => {
+  if (result.user) startApp(result.user.uid);
+}).catch(err => console.error(err));
+
+auth.onAuthStateChanged(user => {
+  if (!user) {
+    signIn(); // force sign-in if not signed in
+  } else {
     startApp(user.uid);
   }
 });
 
-firebase.auth().onAuthStateChanged(user => {
-  if (!user) return;
-  const uid = user.uid;
-  console.log("✅ Signed in anonymously with UID:", uid);
+// ----------------------
+// App Initialization
+// ----------------------
+function startApp(uid) {
+  console.log("Signed in as", uid);
+  const eventsRef = db.collection("events").doc(uid);
 
-  const eventsRef = db.collection("events").doc(user.uid);
-
-  // Listen for real-time updates
+  // Load and listen to changes
   eventsRef.onSnapshot(doc => {
     events = doc.exists ? doc.data().eventsArray || {} : {};
-    console.log("Loaded events from Firestore:", events);
     renderCalendar();
   });
 
-  // ----------------------
   // Save events to Firestore
-  // ----------------------
   window.saveEvents = async function () {
     await eventsRef.set({ eventsArray: events });
     console.log("Saved events to Firestore");
   };
-});
 
+  // Load settings from localStorage
+  if (settings.semesterStart) document.getElementById("semesterStart").value = settings.semesterStart;
+  if (settings.semesterEnd) document.getElementById("semesterEnd").value = settings.semesterEnd;
+
+  renderCalendar();
+}
 // ----------------------
 // Settings
 // ----------------------
