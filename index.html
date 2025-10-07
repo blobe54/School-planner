@@ -100,6 +100,24 @@
     <button onclick="closeSettings()">Close</button>
   </div>
 </div>
+  <!-- Firebase App (the core Firebase SDK) -->
+<script src="https://www.gstatic.com/firebasejs/9.25.0/firebase-app.js"></script>
+<!-- Firebase Firestore -->
+<script src="https://www.gstatic.com/firebasejs/9.25.0/firebase-firestore.js"></script>
+
+<script>
+  // Initialize Firebase
+  const app = firebase.initializeApp(const firebaseConfig = {
+  apiKey: "AIzaSyBFSZVjHYWso7J9_promQtfjHjOutPG70o",
+  authDomain: "schoolplaner-3ff93.firebaseapp.com",
+  projectId: "schoolplaner-3ff93",
+  storageBucket: "schoolplaner-3ff93.firebasestorage.app",
+  messagingSenderId: "1071108518857",
+  appId: "1:1071108518857:web:4baae7ffd8916fcf0f2e18",
+  measurementId: "G-NY4N6FGWY6"
+};);
+  const db = firebase.firestore();
+</script>
 <script src="script.js"></script>
 </body>
 </html>
