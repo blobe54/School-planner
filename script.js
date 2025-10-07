@@ -2,24 +2,21 @@
 // Initialization
 // ----------------------
 let currentDate = new Date();
-let events = {}; // will be loaded from Firestore
-let filters = ["exam", "handin", "other"];
+let events = {};   
+let settings = JSON.parse(localStorage.getItem("settings")||"{}");
+let filters = ["exam","handin","other"];
 let pendingDateStr = null;
-let currentDetail = { dateStr: null, index: null, event: null };
+let currentDetail = {dateStr:null, index:null, event:null};
 
-// Load settings from localStorage (only settings, not events)
-let settings = JSON.parse(localStorage.getItem("settings") || "{}");
-
-// ----------------------
-// Firestore Real-time Sync
-// ----------------------
+// Listen for real-time updates
 db.collection("events").onSnapshot(snapshot => {
   events = {}; // reset local events
   snapshot.forEach(doc => {
     events[doc.id] = doc.data().eventsArray || [];
   });
-  renderCalendar();
+  renderCalendar(); // render calendar after Firestore updates
 });
+
 
 // ----------------------
 // Save events to Firestore
@@ -308,5 +305,4 @@ function renderCalendar() {
 // ----------------------
 // Initial Render
 // ----------------------
-renderCalendar();
 
