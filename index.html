@@ -107,29 +107,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  
-<script>
-  // Initialize Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyBFSZVjHYWso7J9_promQtfjHjOutPG70o",
-    authDomain: "schoolplaner-3ff93.firebaseapp.com",
-    projectId: "schoolplaner-3ff93",
-    storageBucket: "schoolplaner-3ff93.firebasestorage.app",
-    messagingSenderId: "1071108518857",
-    appId: "1:1071108518857:web:4baae7ffd8916fcf0f2e18",
-    measurementId: "G-NY4N6FGWY6"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-  window.db = firebase.firestore(); // make Firestore globally accessible
-  console.log("✅ Firebase initialized successfully");
-  // Sign in anonymously (so we have a UID for this user)
-  auth.signInAnonymously().catch(error => {
-    console.error("Auth error:", error);
-  });
-</script>
-
-<!-- Firebase Auth -->
 
 <!-- Main script -->
 <script src="script.js"></script>
