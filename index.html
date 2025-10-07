@@ -110,7 +110,7 @@
 
 <script>
   // Initialize Firebase
-  document.addEventListener(("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", () => {
     const firebaseConfig = {
       apiKey: "AIzaSyBFSZVjHYWso7J9_promQtfjHjOutPG70o",
       authDomain: "schoolplaner-3ff93.firebaseapp.com",
@@ -124,7 +124,7 @@
     const app = firebase.initializeApp(firebaseConfig);
     window.db = firebase.firestore(); // <-- make db global
     console.log("✅ Firebase initialized successfully");
-  }));
+  });
 </script>
 
 <!-- Your main script -->
