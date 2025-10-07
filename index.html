@@ -122,8 +122,14 @@
   firebase.initializeApp(firebaseConfig);
   window.db = firebase.firestore(); // make Firestore globally accessible
   console.log("✅ Firebase initialized successfully");
+  // Sign in anonymously (so we have a UID for this user)
+  auth.signInAnonymously().catch(error => {
+    console.error("Auth error:", error);
+  });
 </script>
 
+<!-- Firebase Auth -->
+<script src="https://www.gstatic.com/firebasejs/9.25.0/firebase-auth-compat.js"></script>
 <!-- Main script -->
 <script src="script.js"></script>
 
